@@ -183,18 +183,34 @@ fun StudentManagerScreen() {
 
         Spacer(modifier = Modifier.height(12.dp))
 
+
         students.forEach { student ->
-            StudentCard(student)
+            StudentCard(
+                student = student,
+                onDelete = {
+                    students = students.filter {
+                        it.id != student.id
+                    }
+                }
+            )
 
             Spacer(modifier = Modifier.height(12.dp))
         }
+
     }
 }
 
 @Composable
-fun StudentCard(student: Student) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp)) {
+fun StudentCard(
+    student: Student,
+    onDelete: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
             Text(
                 text = student.name,
                 style = MaterialTheme.typography.titleLarge,
@@ -203,7 +219,9 @@ fun StudentCard(student: Student) {
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            Row(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 Text(
                     text = "Age: ${student.age}",
                     modifier = Modifier.weight(1f)
@@ -215,6 +233,14 @@ fun StudentCard(student: Student) {
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(text = student.course)
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Button(
+                onClick = onDelete
+            ) {
+                Text("Delete Student")
+            }
         }
     }
 }
