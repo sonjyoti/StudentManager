@@ -69,7 +69,9 @@ fun StudentManagerScreen() {
     var name by remember { mutableStateOf("") }
     var age by remember { mutableStateOf("") }
     var course by remember { mutableStateOf("") }
-    var errorMessage by remember { mutableStateOf("") }
+    var nameError by remember { mutableStateOf(false) }
+    var ageError by remember { mutableStateOf(false) }
+    var courseError by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -98,8 +100,17 @@ fun StudentManagerScreen() {
 
         OutlinedTextField(
             value = name,
-            onValueChange = { name = it },
+            onValueChange = {
+                name = it
+                nameError = false
+            },
             label = { Text("Student Name") },
+            isError = nameError,
+            supportingText = {
+                if (nameError) {
+                    Text("Name cannot be empty")
+                }
+            },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )
@@ -108,8 +119,17 @@ fun StudentManagerScreen() {
 
         OutlinedTextField(
             value = age,
-            onValueChange = { age = it },
+            onValueChange = {
+                age = it
+                ageError = false
+            },
             label = { Text("Age") },
+            isError = ageError,
+            supportingText = {
+                if (ageError) {
+                    Text("Enter a valid positive age")
+                }
+            },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )
@@ -118,8 +138,17 @@ fun StudentManagerScreen() {
 
         OutlinedTextField(
             value = course,
-            onValueChange = { course = it },
+            onValueChange = {
+                course = it
+                courseError = false
+            },
             label = { Text("Course") },
+            isError = courseError,
+            supportingText = {
+                if (courseError) {
+                    Text("Course cannot be empty")
+                }
+            },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )
@@ -130,48 +159,30 @@ fun StudentManagerScreen() {
             onClick = {
                 val parsedAge = age.toIntOrNull()
 
-                when {
-                    name.isBlank() ->
-                        errorMessage = "Please enter the student's name"
+                nameError = name.isBlank()
+                ageError = parsedAge == null || parsedAge <= 0
+                courseError = course.isBlank()
 
-                    parsedAge == null || parsedAge <= 0 ->
-                        errorMessage = "Please enter a valid positive age"
+                if (!nameError && !ageError && !courseError) {
+                    val nextId = (students.maxOfOrNull { it.id } ?: 0) + 1
 
-                    course.isBlank() ->
-                        errorMessage = "Please enter the course"
+                    val newStudent = Student(
+                        id = nextId,
+                        name = name.trim(),
+                        age = parsedAge!!,
+                        course = course.trim()
+                    )
 
-                    else -> {
-                        val nextId =
-                            (students.maxOfOrNull { it.id } ?: 0) + 1
+                    students = students + newStudent
 
-                        val newStudent = Student(
-                            id = nextId,
-                            name = name.trim(),
-                            age = parsedAge,
-                            course = course.trim()
-                        )
-
-                        students = students + newStudent
-
-                        name = ""
-                        age = ""
-                        course = ""
-                        errorMessage = ""
-                    }
+                    name = ""
+                    age = ""
+                    course = ""
                 }
             },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Add Student")
-        }
-
-        if (errorMessage.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = errorMessage,
-                color = MaterialTheme.colorScheme.error
-            )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
